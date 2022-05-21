@@ -6,13 +6,12 @@ use rayon::prelude::*;
 mod pipeline;
 mod startup;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
     let (filename, start_year, end_year) = startup::env_args();
     let file = startup::open_file(&filename)?;
 
     let (tx, rx) = mpsc::channel::<HurricaneTrack>();
-    tokio::task::spawn_blocking(move || io::stream_file(tx, file, start_year, end_year));
+    rayon::spawn(move || io::stream_file(tx, file, start_year, end_year));
 
     let analyses = rx
         .into_iter()
