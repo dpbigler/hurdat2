@@ -8,6 +8,28 @@ pub struct HurricaneTrack {
     pub path: Vec<HurricanePathSnapshot>,
 }
 
+pub struct HurricanePathSnapshot {
+    pub datetime: DateTime<Utc>,
+    pub latitude: String,
+    pub longitude: String,
+    pub max_sustained_wind_speed: i64,
+}
+
+pub struct HurricaneLandfallAnalysis {
+    pub index: usize,
+    pub name: String,
+    pub path: Vec<HurricanePathSnapshot>,
+    pub florida_enter_date: DateTime<Utc>,
+    pub florida_exit_date: DateTime<Utc>,
+}
+
+pub struct HurricaneFinalAnalysis {
+    pub name: String,
+    pub landfall_date: DateTime<Utc>,
+    pub max_sustained_wind_speed: i64,
+    pub max_gust_wind_speed: i64,
+}
+
 impl HurricaneTrack {
     pub fn new(index: usize, name: String) -> HurricaneTrack {
         HurricaneTrack {
@@ -17,14 +39,6 @@ impl HurricaneTrack {
         }
     }
 }
-
-pub struct HurricanePathSnapshot {
-    pub datetime: DateTime<Utc>,
-    pub latitude: String,
-    pub longitude: String,
-    pub max_sustained_wind_speed: i64,
-}
-
 impl HurricanePathSnapshot {
     pub fn build_from_hurdat2(line: String) -> HurricanePathSnapshot {
         let split: Vec<&str> = line.split(",").map(|s| s.trim()).collect();
@@ -59,17 +73,4 @@ where
     T::Err: Debug,
 {
     s.parse().expect("Error while parsing hurdat2 data line")
-}
-
-pub struct HurricaneWindAnalysis {
-    pub track: HurricaneTrack,
-    pub est_max_sustained_wind: i64,
-    pub est_max_gust_wind: i64,
-}
-
-pub struct HurricaneFinalAnalysis {
-    pub name: String,
-    pub landfall_date: String,
-    pub est_max_sustained_wind: i64,
-    pub est_max_gust_wind: i64,
 }

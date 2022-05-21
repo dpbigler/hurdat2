@@ -27,7 +27,7 @@ impl Display for HurricaneFinalAnalysis {
         write!(
             f,
             "Name: {}, Date: {}, Sustained: {}, Gust: {}",
-            self.name, self.landfall_date, self.est_max_sustained_wind, self.est_max_gust_wind
+            self.name, self.landfall_date, self.max_sustained_wind_speed, self.max_gust_wind_speed
         )
     }
 }
