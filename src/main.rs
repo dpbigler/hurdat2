@@ -1,6 +1,6 @@
 use std::{collections::HashMap, error::Error, sync::mpsc};
 
-use pipeline::{analysis, data::HurricanePath, display, io};
+use pipeline::{analysis, data::HurricaneTrack, display, io};
 use rayon::prelude::*;
 
 mod pipeline;
@@ -11,13 +11,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let (filename, start_year, end_year) = startup::env_args();
     let file = startup::open_file(&filename)?;
 
-    let (tx, rx) = mpsc::channel::<HurricanePath>();
+    let (tx, rx) = mpsc::channel::<HurricaneTrack>();
     tokio::task::spawn_blocking(move || io::stream_file(tx, file, start_year, end_year));
 
     let analyses = rx
         .into_iter()
         .par_bridge()
-        .map(|path| analysis::process(path))
+        .map(|path| analysis::estimate_winds(path))
+        .map(|wind_analysis| analysis::estimate_landfall(wind_analysis))
         .reduce(
             || HashMap::new(),
             |coll, path_map| analysis::reduce(coll, path_map),

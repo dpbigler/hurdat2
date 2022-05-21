@@ -1,40 +1,60 @@
 use std::{fs::File, io::BufRead, io::BufReader, sync::mpsc};
 
-use super::data::HurricanePath;
+use super::data::{HurricanePathSnapshot, HurricaneTrack};
 
-pub fn stream_file(
-    mut tx: mpsc::Sender<HurricanePath>,
-    file: File,
-    start_year: i64,
-    end_year: i64,
-) {
-    let mut path: Option<HurricanePath> = None;
+pub fn stream_file(tx: mpsc::Sender<HurricaneTrack>, file: File, start_year: i64, end_year: i64) {
+    let mut hurricane_track: Option<HurricaneTrack> = None;
+    let mut hurricane_index = 0;
     let mut rows_to_follow = 0;
 
-    for line_result in BufReader::new(file).lines() {
-        let line = line_result.unwrap();
-        let line_vals: Vec<&str> = line.split(",").collect();
-
+    for line in BufReader::new(file).lines() {
         if rows_to_follow == 0 {
-            if let Some(p) = path {
-                tx.send(p).unwrap();
+            if let Some(track) = hurricane_track {
+                tx.send(track).unwrap();
+                hurricane_index += 1;
             }
 
-            // TODO - check that year makes sense here
-
-            let hurricane_id = line_vals[0];
-            let hurricane_name = line_vals[1];
-            // path = Some(HurricanePath::new(hurricane_id, hurricane_name));
-            // rows_to_follow = line_vals[2].trim().parse::<i64>().unwrap();
+            ParsedLine {
+                rows_to_follow,
+                track: hurricane_track,
+            } = ParsedLine::new(line.unwrap(), hurricane_index, start_year, end_year);
 
             continue;
         }
 
-        // let datum = HurricaneDatum::new();
-        // if let Some(p) = &mut path {
-        //     p.data.push(datum);
-        // }
+        if let Some(ref mut track) = hurricane_track {
+            let snapshot = HurricanePathSnapshot::build_from_hurdat2(line.unwrap());
+            track.path.push(snapshot);
+        }
 
         rows_to_follow -= 1;
+    }
+}
+
+struct ParsedLine {
+    rows_to_follow: i64,
+    track: Option<HurricaneTrack>,
+}
+
+impl ParsedLine {
+    pub fn new(line: String, index: usize, start_year: i64, end_year: i64) -> ParsedLine {
+        let line_vals: Vec<&str> = line.split(",").map(|s| s.trim()).collect();
+
+        let hurricane_id = line_vals[0];
+        let hurricane_name = line_vals[1];
+        let rows_to_follow = line_vals[2].parse().unwrap();
+
+        let hurricane_year: i64 = hurricane_id[4..8].parse().unwrap();
+        if hurricane_year < start_year || hurricane_year > end_year {
+            return ParsedLine {
+                rows_to_follow,
+                track: None,
+            };
+        }
+
+        ParsedLine {
+            rows_to_follow,
+            track: Some(HurricaneTrack::new(index, hurricane_name.to_string())),
+        }
     }
 }
