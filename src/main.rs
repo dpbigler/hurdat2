@@ -48,7 +48,7 @@ fn main() {
         .into_iter()
         // Converts the iterator of HurricaneTracks that we pull off the channel
         // into a ParallelIterator. Importantly, par_bridge makes no attempt to
-        // preserve the order of the iterator, so we have to keep track of it
+        // preserve the order of the iterator, so we have to keep track of
         // the order in which we receive HurricaneTracks ourselves.
         .par_bridge()
         .map(|path| analysis::estimate_landfall(path, &florida_polygon_vec))
