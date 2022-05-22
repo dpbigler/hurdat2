@@ -5,6 +5,9 @@ use kml::Kml;
 
 use super::data::{HurricanePathSnapshot, HurricaneTrack};
 
+/// Reads in lines from the hurdat2 dataset and parses them into
+/// HurricaneTracks. HurricaneTracks are then passed to the channel
+/// tx so that processing can begin immediately.
 pub fn stream_file(tx: mpsc::Sender<HurricaneTrack>, file: File, start_year: i64, end_year: i64) {
     let mut hurricane_track: Option<HurricaneTrack> = None;
     let mut hurricane_index = 0;
@@ -17,10 +20,10 @@ pub fn stream_file(tx: mpsc::Sender<HurricaneTrack>, file: File, start_year: i64
                 hurricane_index += 1;
             }
 
-            ParsedLine {
+            ParsedHeaderLine {
                 rows_to_follow,
                 track: hurricane_track,
-            } = ParsedLine::new(line.unwrap(), hurricane_index, start_year, end_year);
+            } = ParsedHeaderLine::new(line.unwrap(), hurricane_index, start_year, end_year);
 
             continue;
         }
@@ -50,13 +53,15 @@ pub fn parse_florida_kml(kml_data: &str) -> MultiPolygon<f64> {
     MultiPolygon::new(polygon_vec)
 }
 
-struct ParsedLine {
+/// ParsedHeader.track is None iff the hurricane
+/// formed outside of the years specified by the user.
+struct ParsedHeaderLine {
     rows_to_follow: i64,
     track: Option<HurricaneTrack>,
 }
 
-impl ParsedLine {
-    pub fn new(line: String, index: usize, start_year: i64, end_year: i64) -> ParsedLine {
+impl ParsedHeaderLine {
+    pub fn new(line: String, index: usize, start_year: i64, end_year: i64) -> ParsedHeaderLine {
         let line_vals: Vec<&str> = line.split(",").map(|s| s.trim()).collect();
 
         let hurricane_id = line_vals[0];
@@ -65,13 +70,13 @@ impl ParsedLine {
 
         let hurricane_year: i64 = hurricane_id[4..8].parse().unwrap();
         if hurricane_year < start_year || hurricane_year > end_year {
-            return ParsedLine {
+            return ParsedHeaderLine {
                 rows_to_follow,
                 track: None,
             };
         }
 
-        ParsedLine {
+        ParsedHeaderLine {
             rows_to_follow,
             track: Some(HurricaneTrack::new(index, hurricane_name.to_string())),
         }

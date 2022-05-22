@@ -12,25 +12,39 @@ use super::data::{
     HurricaneFinalAnalysis, HurricaneLandfallAnalysis, HurricanePathSnapshot, HurricaneTrack,
 };
 
+/// A helper struct for landfall analysis. Stores
+/// the time of a snapshot, the coordinate of the hurricane,
+/// and whether that coordinate is over Florida.
 struct SnapshotOverFlorida {
     is_in_florida: bool,
     datetime: DateTime<Utc>,
     coordinate: Coordinate<f64>,
 }
 
+/// A helper struct for landfall analysis. Stores
+/// only the time of a snapshot and the coordinate
+/// of the hurricane.
 struct SnapshotTimedCoordinate {
     coordinate: Coordinate<f64>,
     datetime: DateTime<Utc>,
 }
 
 impl SnapshotTimedCoordinate {
-    fn build(coordinate: Coordinate<f64>, datetime: DateTime<Utc>) -> Option<SnapshotTimedCoordinate> {
+    fn build(
+        coordinate: Coordinate<f64>,
+        datetime: DateTime<Utc>,
+    ) -> Option<SnapshotTimedCoordinate> {
         Some(SnapshotTimedCoordinate {
             coordinate,
             datetime,
         })
     }
 }
+
+/// Estimates the time and date that the hurricane landed in Florida.
+/// If the hurricane did not land in Florida, we return None. These
+/// hurricanes will be silently filtered out during the following
+/// steps in the pipeline.
 pub fn estimate_landfall(
     track: HurricaneTrack,
     florida_multipolygon: &MultiPolygon<f64>,
@@ -39,6 +53,8 @@ pub fn estimate_landfall(
     let mut first_coord_inside_florida: Option<SnapshotTimedCoordinate> = None;
     let mut last_coord_inside_florida: Option<SnapshotTimedCoordinate> = None;
 
+    // In parallel, we determine whether or not a hurricane snapshot was
+    // taken over Florida.
     let snapshot_summaries: Vec<SnapshotOverFlorida> = track
         .path
         .par_iter()
@@ -97,6 +113,12 @@ pub fn estimate_landfall(
     }
 }
 
+/// Estimates the max wind speeds of the hurricane while it was over
+/// Florida. More details about selection of the calculation can be
+/// found in the ReadMe.
+///
+/// We return a BTreeMap, mapping the hurricane index to the
+/// HurricaneFinalAnalysis for the reduce step in our pipeline.
 pub fn estimate_max_winds(
     landfall_analysis: Option<HurricaneLandfallAnalysis>,
 ) -> BTreeMap<usize, HurricaneFinalAnalysis> {
@@ -124,6 +146,13 @@ pub fn estimate_max_winds(
     indexed_analysis
 }
 
+/// Used in the reduce step of the map-reduce pipeline. The
+/// reduce provided by Rayon is fully parallel, so the parameter
+/// types must be the same as the return type.
+///
+/// A BTreeMap is used so that we can print the data for each hurricane
+/// in the order that they appeared in the hurdat2 dataset without
+/// performing a sort step.
 pub fn reduce(
     mut analysis_1: BTreeMap<usize, HurricaneFinalAnalysis>,
     analysis_2: BTreeMap<usize, HurricaneFinalAnalysis>,
@@ -144,6 +173,7 @@ fn interpolate_landfall(
     let d1 = outside_point.euclidean_distance(&inside_point);
     let d2 = outside_point.euclidean_distance(florida_multipolygon);
 
+    // Chrono arithmetic hack
     let normalized_d1 = (d1 * 1_000.0) as i32;
     let normalized_d2 = (d2 * 1_000.0) as i32;
 

@@ -13,12 +13,12 @@ pub fn all_analyses(analysis_map: BTreeMap<usize, HurricaneFinalAnalysis>) {
 }
 
 fn display_header() {
-        print!(
-            "| {:15} | {:25} | {:20} | {:15} |\n",
-            "Name", "Landfall", "Max Sustained (kt)", "Max Gust (kt)"
-        );
+    print!(
+        "| {:15} | {:25} | {:20} | {:15} |\n",
+        "Name", "Landfall", "Max Sustained (kt)", "Max Gust (kt)"
+    );
 
-        println!("{}", "-".repeat(TABLE_WIDTH));
+    println!("{}", "-".repeat(TABLE_WIDTH));
 }
 
 impl Display for HurricaneFinalAnalysis {
@@ -26,9 +26,12 @@ impl Display for HurricaneFinalAnalysis {
         write!(
             f,
             "| {:15} | {:25} | {:20.0} | {:15.0} |\n",
-            self.name, self.landfall_date.to_string(), self.max_sustained_wind_speed, self.max_gust_wind_speed
+            self.name,
+            self.landfall_date.to_string(),
+            self.max_sustained_wind_speed,
+            self.max_gust_wind_speed
         )?;
 
-        write!(f,"{}", "-".repeat(TABLE_WIDTH))
+        write!(f, "{}", "-".repeat(TABLE_WIDTH))
     }
 }
