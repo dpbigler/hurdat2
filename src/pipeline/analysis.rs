@@ -12,6 +12,8 @@ use super::data::{
     HurricaneFinalAnalysis, HurricaneLandfallAnalysis, HurricanePathSnapshot, HurricaneTrack,
 };
 
+const HURRICANE_GUST_FACTOR: f64 = 1.55;
+
 /// A helper struct for landfall analysis. Stores
 /// the time of a snapshot, the coordinate of the hurricane,
 /// and whether that coordinate is over Florida.
@@ -134,7 +136,7 @@ pub fn estimate_max_winds(
                 |max_wind_1, max_wind_2| std::cmp::max(max_wind_1, max_wind_2),
             );
 
-        let max_gust_wind_speed = (*max_sustained_wind_speed as f64) * 1.55;
+        let max_gust_wind_speed = (*max_sustained_wind_speed as f64) * HURRICANE_GUST_FACTOR;
         let final_analysis = HurricaneFinalAnalysis {
             name: analysis.name,
             landfall: analysis.landfall,
