@@ -33,10 +33,17 @@ occurred, and an estimate of the maximum sustained and gust wind speeds.
 We use cartographic boundary files, in KML format, provided by the US
 Census bureau for landfall estimation. We use the Hurricane's 
 last known location outside of Florida and the first known location inside
-of Florida, as well as the times at which they measured, to 
+of Florida, as well as the times at which they measured and knowledge of 
+the location of Florida's border, to interpolate the date and time of
+landfall in Florida.
 
-
-
+As far as the author can tell, the modelling of a hurricane's gust factor $U_max / U$
+at a given location is an ongoing area of research. However, according to 
+*Gust Factors Applied to Hurricane Winds (Krayer, Marshall)*, "...mean 2-s gust factor based on
+the 10-min mean speed in hurricane winds is seen to be about 1.55". So, we 
+simply use a gust factor of 1.55 to estimate a Hurricane's max gust speed. A 
+more sophisticated model might use Land Use Land Cover data to take into account
+terrain roughness.
 
 ### Some Benchmarking
 ```
