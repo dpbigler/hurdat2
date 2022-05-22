@@ -10,8 +10,8 @@ pub struct HurricaneTrack {
 
 pub struct HurricanePathSnapshot {
     pub datetime: DateTime<Utc>,
-    pub latitude: String,
-    pub longitude: String,
+    pub latitude: f64,
+    pub longitude: f64,
     pub max_sustained_wind_speed: i64,
 }
 
@@ -19,15 +19,16 @@ pub struct HurricaneLandfallAnalysis {
     pub index: usize,
     pub name: String,
     pub path: Vec<HurricanePathSnapshot>,
-    pub florida_enter_date: DateTime<Utc>,
-    pub florida_exit_date: DateTime<Utc>,
+    pub landfall: DateTime<Utc>,
+    pub first_datetime_over_florida: DateTime<Utc>,
+    pub last_datetime_over_florida: DateTime<Utc>,
 }
 
 pub struct HurricaneFinalAnalysis {
     pub name: String,
     pub landfall_date: DateTime<Utc>,
-    pub max_sustained_wind_speed: i64,
-    pub max_gust_wind_speed: i64,
+    pub max_sustained_wind_speed: f64,
+    pub max_gust_wind_speed: f64,
 }
 
 impl HurricaneTrack {
@@ -55,8 +56,9 @@ impl HurricanePathSnapshot {
             .and_time(NaiveTime::from_hms(hours, minutes, 0))
             .expect("Error parsing hurdat2 DateTime");
 
-        let latitude = split[4].to_string();
-        let longitude = split[5].to_string();
+        let latitude = parse_coordinate(split[4]);
+        let longitude = parse_coordinate(split[5]);
+
         let max_sustained_wind_speed = parse_int(&split[6]);
 
         HurricanePathSnapshot {
@@ -73,4 +75,18 @@ where
     T::Err: Debug,
 {
     s.parse().expect("Error while parsing hurdat2 data line")
+}
+
+fn parse_coordinate(s: &str) -> f64 {
+    let coordinate_value: f64 = s[0..s.len() - 1]
+        .parse()
+        .expect("Error parsing coordinate value");
+
+    let coordinate_direction = &s[s.len() - 1..s.len()];
+
+    match coordinate_direction.as_bytes() {
+        b"W" | b"S" => -coordinate_value,
+        b"E" | b"N" => coordinate_value,
+        _ => panic!("Error parsing coordinate direction"),
+    }
 }

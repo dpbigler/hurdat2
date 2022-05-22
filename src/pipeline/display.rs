@@ -1,14 +1,12 @@
-use std::{collections::HashMap, fmt::Display};
+use std::{collections::BTreeMap, fmt::Display};
 
 use super::data::HurricaneFinalAnalysis;
 
-pub fn all_analyses(mut analysis_map: HashMap<usize, HurricaneFinalAnalysis>) {
+pub fn all_analyses(analysis_map: BTreeMap<usize, HurricaneFinalAnalysis>) {
     display_header();
 
-    let mut i = 0;
-    while !analysis_map.is_empty() {
-        println!("{}", analysis_map.remove(&i).unwrap());
-        i += 1;
+    for (_, final_analysis) in analysis_map {
+        println!("{}", final_analysis);
     }
 
     display_footer();

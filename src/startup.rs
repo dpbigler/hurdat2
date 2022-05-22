@@ -1,4 +1,4 @@
-use std::{env, error::Error, fs::File};
+use std::{env, fs::File};
 
 const BAD_USER_INPUT_YEAR_MESSAGE: &'static str =
     "Start and end years must be integers between 1851 and 2021, inclusive";
@@ -33,11 +33,13 @@ pub fn env_args() -> (String, i64, i64) {
     }
 }
 
-pub fn open_file(filename: &str) -> Result<File, Box<dyn Error>> {
-    let file_path = env::current_dir()?.join(filename);
+pub fn open_file(filename: &str) -> File {
+    let file_path = env::current_dir()
+        .expect("Failed to read current directory")
+        .join(filename);
     match File::open(&file_path) {
         Err(e) => panic!("Couldn't read {}: {}", &file_path.to_str().unwrap(), e),
-        Ok(file) => Ok(file),
+        Ok(file) => file,
     }
 }
 

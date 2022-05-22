@@ -1,5 +1,8 @@
 use std::{fs::File, io::BufRead, io::BufReader, sync::mpsc};
 
+use geo::{Geometry, MultiPolygon};
+use kml::Kml;
+
 use super::data::{HurricanePathSnapshot, HurricaneTrack};
 
 pub fn stream_file(tx: mpsc::Sender<HurricaneTrack>, file: File, start_year: i64, end_year: i64) {
@@ -29,6 +32,22 @@ pub fn stream_file(tx: mpsc::Sender<HurricaneTrack>, file: File, start_year: i64
 
         rows_to_follow -= 1;
     }
+}
+
+pub fn parse_florida_kml(kml_data: &str) -> MultiPolygon<f64> {
+    let florida_kml: Kml = kml_data.parse().unwrap();
+    let florida_geometry_collection = kml::quick_collection(florida_kml).unwrap();
+
+    let mut polygon_vec = Vec::new();
+    for geometry in florida_geometry_collection {
+        if let Geometry::Polygon(p) = geometry {
+            polygon_vec.push(p)
+        } else {
+            panic!("Incorrectly specified multigeometry KML file")
+        }
+    }
+
+    MultiPolygon::new(polygon_vec)
 }
 
 struct ParsedLine {
