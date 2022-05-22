@@ -2,7 +2,7 @@ use std::{collections::BTreeMap, fmt::Display};
 
 use super::data::HurricaneFinalAnalysis;
 
-const TABLE_WIDTH: usize = 83;
+const TABLE_WIDTH: usize = 88;
 
 pub fn all_analyses(analysis_map: BTreeMap<usize, HurricaneFinalAnalysis>) {
     display_header();
@@ -14,7 +14,7 @@ pub fn all_analyses(analysis_map: BTreeMap<usize, HurricaneFinalAnalysis>) {
 
 fn display_header() {
     print!(
-        "| {:15} | {:20} | {:20} | {:15} |\n",
+        "| {:15} | {:25} | {:20} | {:15} |\n",
         "Name", "Landfall", "Max Sustained (kt)", "Max Gust (kt)"
     );
 
@@ -25,9 +25,9 @@ impl Display for HurricaneFinalAnalysis {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "| {:15} | {:20} | {:20.0} | {:15.0} |\n",
+            "| {:15} | {:25} | {:20.0} | {:15.0} |\n",
             self.name,
-            self.landfall.format("%Y-%m-%d %H:%M").to_string(),
+            self.landfall.format("%Y-%m-%d %H:%M:%S UTC").to_string(),
             self.max_sustained_wind_speed,
             self.max_gust_wind_speed
         )?;
