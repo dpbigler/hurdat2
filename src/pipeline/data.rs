@@ -35,7 +35,7 @@ pub struct HurricaneLandfallAnalysis {
 /// to the user
 pub struct HurricaneFinalAnalysis {
     pub name: String,
-    pub landfall_date: DateTime<Utc>,
+    pub landfall: DateTime<Utc>,
     pub max_sustained_wind_speed: f64,
     pub max_gust_wind_speed: f64,
 }

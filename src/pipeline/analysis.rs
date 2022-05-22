@@ -137,7 +137,7 @@ pub fn estimate_max_winds(
         let max_gust_wind_speed = (*max_sustained_wind_speed as f64) * 1.55;
         let final_analysis = HurricaneFinalAnalysis {
             name: analysis.name,
-            landfall_date: analysis.first_datetime_over_florida,
+            landfall: analysis.landfall,
             max_sustained_wind_speed: *max_sustained_wind_speed as f64,
             max_gust_wind_speed,
         };
