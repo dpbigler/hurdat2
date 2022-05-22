@@ -60,7 +60,7 @@ impl ParsedLine {
         let line_vals: Vec<&str> = line.split(",").map(|s| s.trim()).collect();
 
         let hurricane_id = line_vals[0];
-        let hurricane_name = line_vals[1];
+        let hurricane_name = line_vals[1].trim();
         let rows_to_follow = line_vals[2].parse().unwrap();
 
         let hurricane_year: i64 = hurricane_id[4..8].parse().unwrap();

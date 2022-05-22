@@ -2,30 +2,33 @@ use std::{collections::BTreeMap, fmt::Display};
 
 use super::data::HurricaneFinalAnalysis;
 
+const TABLE_WIDTH: usize = 88;
+
 pub fn all_analyses(analysis_map: BTreeMap<usize, HurricaneFinalAnalysis>) {
     display_header();
 
     for (_, final_analysis) in analysis_map {
         println!("{}", final_analysis);
     }
-
-    display_footer();
 }
 
 fn display_header() {
-    println!("Header")
-}
+        print!(
+            "| {:15} | {:25} | {:20} | {:15} |\n",
+            "Name", "Landfall", "Max Sustained (kt)", "Max Gust (kt)"
+        );
 
-fn display_footer() {
-    println!("Footer")
+        println!("{}", "-".repeat(TABLE_WIDTH));
 }
 
 impl Display for HurricaneFinalAnalysis {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Name: {}, Date: {}, Sustained: {}, Gust: {}",
-            self.name, self.landfall_date, self.max_sustained_wind_speed, self.max_gust_wind_speed
-        )
+            "| {:15} | {:25} | {:20.0} | {:15.0} |\n",
+            self.name, self.landfall_date.to_string(), self.max_sustained_wind_speed, self.max_gust_wind_speed
+        )?;
+
+        write!(f,"{}", "-".repeat(TABLE_WIDTH))
     }
 }
