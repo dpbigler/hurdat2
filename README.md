@@ -26,7 +26,7 @@ e.g.,
 ### Details
 This application attempts to construct an analysis of the hurdat2
 dataset provided by the National Hurricane Center. In particular,
-we print a table consisting of all hurricanes that landed in Florida 
+we print a table consisting of the names of all hurricanes that landed in Florida 
 during the specified years, an estimate of the date and time that landfall 
 occurred, and an estimate of the maximum sustained and gust wind speeds.
 
