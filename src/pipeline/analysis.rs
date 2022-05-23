@@ -170,10 +170,10 @@ fn interpolate_landfall(
     inside_florida_tc: &SnapshotTimedCoordinate,
     florida_multipolygon: &MultiPolygon<f64>,
 ) -> DateTime<Utc> {
-    let outside_point = Point::from(outside_florida_tc.coordinate);
-    let inside_point = Point::from(inside_florida_tc.coordinate);
-    let d1 = outside_point.euclidean_distance(&inside_point);
-    let d2 = outside_point.euclidean_distance(florida_multipolygon);
+    let outside_florida_coordinate = Point::from(outside_florida_tc.coordinate);
+    let inside_florida_coordinate = Point::from(inside_florida_tc.coordinate);
+    let d1 = outside_florida_coordinate.euclidean_distance(&inside_florida_coordinate);
+    let d2 = outside_florida_coordinate.euclidean_distance(florida_multipolygon);
 
     // Chrono arithmetic hack
     let normalized_d1 = (d1 * 1_000.0) as i32;
